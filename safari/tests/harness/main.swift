@@ -75,6 +75,11 @@ final class Harness: NSObject, WKWebExtensionControllerDelegate, WKNavigationDel
         for error in ext.errors { print("manifest: \(error.localizedDescription)") }
         context = WKWebExtensionContext(for: ext)
         context.isInspectable = true
+        // Safari gives an extension a base URL with an upper-case UUID, while
+        // its pages' origin is lower-case; do the same, so a comparison of the
+        // two as strings fails here as it does in Safari.
+        context.baseURL = URL(string: "webkit-extension://\(UUID().uuidString)/")!
+        print("info: extension base URL \(context.baseURL.absoluteString)")
         // What a person grants in Safari: the extension's permissions, and
         // "Always Allow on Every Website" for its Reddit match patterns.
         for permission in ext.requestedPermissions { context.setPermissionStatus(.grantedExplicitly, for: permission) }
@@ -159,6 +164,10 @@ final class Harness: NSObject, WKWebExtensionControllerDelegate, WKNavigationDel
         check("page loads", loaded)
 
         for error in context.errors { print("context error: \(error.localizedDescription)") }
+        if ProcessInfo.processInfo.environment["HARNESS_PROBE"] != nil {
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            print("probe: \(String(describing: try? await js("return document.documentElement.getAttribute('data-res-probe')")))")
+        }
         let injected = await waitFor("document.documentElement.dataset.resHarness", seconds: 15)
         check("WebKit injects the extension's content scripts", injected)
         let resRan = await waitFor("document.documentElement.classList.contains('res')", seconds: 30)
@@ -243,6 +252,28 @@ final class Harness: NSObject, WKWebExtensionControllerDelegate, WKNavigationDel
                 }
                 check("the settings console renders its modules", text.count > 500,
                       "frames seen: \(extensionFrames.count), text: \(text.prefix(120))")
+                // Use the console as a person would: pick a module, then follow one of
+                // its own #res:settings links (the search icon), a navigation inside
+                // the frame that WebKit answers with another load event on the frame.
+                if let frame = extensionFrames.last {
+                    let used = try? await webView.evaluateJavaScript("""
+                        (() => {
+                            const module = document.querySelectorAll('.moduleButton')[3];
+                            if (module) module.click();
+                            const links = [...document.querySelectorAll('a')].filter(a => (a.getAttribute('href') || '').startsWith('#res:settings'));
+                            const link = links.find(a => a.getAttribute('href') === '#res:settings/search') || links[0];
+                            if (link) link.click();
+                            return `${module ? module.dataset.module : '-'}, then ${link ? link.getAttribute('href') : 'no #res:settings link'} (of ${links.length})`;
+                        })()
+                        """, in: frame, contentWorld: .page) as? String
+                    print("info: used the console: \(used ?? "-")")
+                }
+                // RES gives up on the embedded console 3 s after it loads unless the
+                // console reports success; it must still be open well after that.
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                let stillOpen = (try? await js("return !!document.querySelector('iframe[src*=\"options.html\"], #console-container')")) as? Bool ?? false
+                check("the settings console is still open 5 s later", stillOpen && openedTabs.isEmpty,
+                      "open \(stillOpen), tabs opened: \(openedTabs.map(\.absoluteString))")
             }
         } catch { check("settings console", false, "\(error)") }
 
@@ -280,7 +311,7 @@ final class Harness: NSObject, WKWebExtensionControllerDelegate, WKNavigationDel
             } else {
                 check("error report from the harness", false, "unavailable")
             }
-            if !openedTabs.isEmpty { print("info: tabs opened: \(openedTabs)") }
+            check("RES opened no tab of its own", openedTabs.isEmpty, openedTabs.map(\.absoluteString).joined(separator: ", "))
             if !permissionPrompts.isEmpty { print("info: permission prompts: \(permissionPrompts)") }
             print(failures == 0 ? "ALL PASSED" : "\(failures) FAILED")
             exit(failures == 0 ? 0 : 1)
