@@ -154,10 +154,51 @@ visits: Reddit pages of several kinds, all keyed under `www.reddit.com`, and
 one v.redd.it video RES had expanded. A tab
 opened before the extension was turned on had no RES until it was reloaded.
 
+## 2026-11-24: the settings console stays embedded in Safari
+
+**What.** Two fixes to how the in-page settings console starts.
+`settingsNavigation` keeps the URL it loads the console from and opens that in
+a new tab when embedding fails, instead of reading `iframe.src`. The console
+(`options.entry.js`), once running, answers every later `context` message
+with `loadSuccess`.
+
+**Why.** In Safari, clicking one of the console's own `#res:settings` links
+(the RES logo, the search icon) closed the console after 3 s, and Safari then
+showed "the address is invalid" for `webkit-masked-url://hidden`. Two causes:
+
+- `settingsNavigation` re-sends the context and restarts its 3 s embed timer
+  on every `load` event of the frame, and only the console's first start
+  answered. Safari fires that event again when a cross-origin frame
+  navigates to a fragment, without loading a new page.
+- WebKit answers `iframe.src` (and the `src` attribute) for an extension page
+  with `webkit-masked-url://hidden/`, even to the content script that set it.
+
+**Evidence.** A step log written by a diagnostic build into the extension's
+`storage.local` in the owner's Safari, one key per line: the console started
+and reported success in 31 ms; a click on `a[href="#res:settings/search"]`
+gave `hashchange` and then a second `load` on the frame 100 ms later; the same
+console document went on taking clicks (no `pagehide`, no new document); 3 s
+after that `load`, RES opened a tab. Safari 27.2 directly: a cross-origin
+frame fired `load` on each of two fragment navigations, a same-origin frame on
+none. The WebKit harness, with a click on the console's `#res:settings` link
+added: the console was gone 5 s later and RES had opened a tab; with the fix,
+open and no tab, in two runs. The diagnostics were not committed and are not
+in the installed build.
+
+**Rejected.** Arming the timer only on the frame's first `load`: a console that
+really reloads and fails would then go unnoticed.
+
+## 2026-11-24: the visit record survives Safari's changing base URL
+
+Safari gives the extension a new base URL on every launch and every update
+(three UUIDs in one afternoon, from `State.plist`). It moves the extension's
+website data with it: after a reinstall and a relaunch, `res-visits` held 26
+visits, including one from before both. So the record stays in IndexedDB.
+
 ## Open
 
-- **Not checked in Safari itself:** the media download button and the settings
-  console (both pass in the WebKit harness).
+- **Not checked in Safari itself:** the media download button, and the settings
+  console with both fixes above (both pass in the WebKit harness).
 - **Not exercised anywhere yet:** backup sign-in flows (Dropbox, Google Drive,
   OneDrive: `windows.create` popups and `webRequest.onBeforeRedirect`), runtime
   permission prompts for other sites' embeds, private windows.
