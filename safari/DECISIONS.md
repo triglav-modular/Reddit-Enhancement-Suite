@@ -141,11 +141,23 @@ page's data so image expandos can be built.
 **Rejected.** Mocking Reddit's whole API: the test checks the port, and the
 one answered call is the one a feature under test cannot do without.
 
+## 2026-11-24: checked in Safari 27.2, signed in on old.reddit.com
+
+**Evidence.** The owner turned the extension on (Safari's `Extensions.plist`:
+`Enabled`, granted origins `*://*/*`) and browsed old.reddit.com signed in.
+Read-only screenshots of that window showed RES running: the gear beside
+*preferences*, the account switcher, the split karma count, the shortcut bar
+with *Dashboard*, *show images*, the filteReddit funnel, *Use subreddit style*,
+the comment navigator and the user tagger's dialog in use. The extension's
+IndexedDB (`res-visits`, under Safari's `WebKit/WebsiteData/Default`) held 9
+visits: Reddit pages of several kinds, all keyed under `www.reddit.com`, and
+one v.redd.it video RES had expanded. A tab
+opened before the extension was turned on had no RES until it was reloaded.
+
 ## Open
 
-- **Check in Safari itself**, signed in on old.reddit.com: enable the extension,
-  allow reddit.com, then the menu, an image expando and its download, *Mark
-  visited*, the settings console, the toolbar button.
+- **Not checked in Safari itself:** the media download button and the settings
+  console (both pass in the WebKit harness).
 - **Not exercised anywhere yet:** backup sign-in flows (Dropbox, Google Drive,
   OneDrive: `windows.create` popups and `webRequest.onBeforeRedirect`), runtime
   permission prompts for other sites' embeds, private windows.
