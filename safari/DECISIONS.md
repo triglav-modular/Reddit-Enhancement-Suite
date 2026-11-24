@@ -95,7 +95,7 @@ Safari build does not ask for the `downloads` permission.
 `access-control-allow-origin: https://old.reddit.com` (2026-11-24).
 
 **Evidence.** In the harness the button saved a 3.8 MB `.jpeg` under the
-post's title.
+post's title. The owner reports it working in Safari 27.2 (2026-11-24).
 
 ## 2026-11-24: the app is built by a script, signed with the Developer ID and notarised
 
@@ -199,8 +199,6 @@ visits, including one from before both. So the record stays in IndexedDB.
 
 ## Open
 
-- **Not checked in Safari itself:** the media download button (it passes in the
-  WebKit harness).
 - **Not exercised anywhere yet:** backup sign-in flows (Dropbox, Google Drive,
   OneDrive: `windows.create` popups and `webRequest.onBeforeRedirect`), runtime
   permission prompts for other sites' embeds, private windows.
