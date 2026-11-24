@@ -203,5 +203,5 @@ visits, including one from before both. So the record stays in IndexedDB.
   OneDrive: `windows.create` popups and `webRequest.onBeforeRedirect`), runtime
   permission prompts for other sites' embeds, private windows.
 - Opening the settings console hides the toolbar button, because the options
-  page runs `subredditStyleToggle.onInit` from inside the tab. Upstream
-  behaviour, also in Chrome; left as is.
+  page runs `subredditStyleToggle.onInit` from inside the tab. Read from the
+  shared code and not run in Chrome; left as is.

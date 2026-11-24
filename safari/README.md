@@ -34,15 +34,15 @@ settings for it.
   keeps its own record of the Reddit pages you open, the links you follow from
   them and the media it opens. *Mark visited* and the visited and
   comments-opened filters use it. Clearing Safari's history does not clear
-  it; entries are forgotten after a year. Private windows are not recorded.
+  it; entries are forgotten after a year. RES is written to skip private windows.
 - **Downloading media.** The download button saves the file through Safari's
   own downloads, under the post's title; Safari may ask once whether
   old.reddit.com may download files. If the media's host does not allow it,
   the file opens in a new tab instead, to save from there.
 
-Not yet checked in Safari: backups to Dropbox, Google Drive and OneDrive
-(their sign-in windows), and the permission prompts for embeds from other
-sites.
+Checked in Safari 27.2. Not yet checked: private windows, earlier versions of
+Safari, backups to Dropbox, Google Drive and OneDrive (their sign-in windows),
+and the permission prompts for embeds from other sites.
 
 ## Build and test
 

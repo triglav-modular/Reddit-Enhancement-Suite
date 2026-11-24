@@ -75,9 +75,8 @@ final class Harness: NSObject, WKWebExtensionControllerDelegate, WKNavigationDel
         for error in ext.errors { print("manifest: \(error.localizedDescription)") }
         context = WKWebExtensionContext(for: ext)
         context.isInspectable = true
-        // Safari gives an extension a base URL with an upper-case UUID, while
-        // its pages' origin is lower-case; do the same, so a comparison of the
-        // two as strings fails here as it does in Safari.
+        // Safari gives an extension a base URL with an upper-case UUID; do the
+        // same. (URL.origin lower-cases it, so RES's origin checks still match.)
         context.baseURL = URL(string: "webkit-extension://\(UUID().uuidString)/")!
         print("info: extension base URL \(context.baseURL.absoluteString)")
         // What a person grants in Safari: the extension's permissions, and
@@ -164,10 +163,6 @@ final class Harness: NSObject, WKWebExtensionControllerDelegate, WKNavigationDel
         check("page loads", loaded)
 
         for error in context.errors { print("context error: \(error.localizedDescription)") }
-        if ProcessInfo.processInfo.environment["HARNESS_PROBE"] != nil {
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            print("probe: \(String(describing: try? await js("return document.documentElement.getAttribute('data-res-probe')")))")
-        }
         let injected = await waitFor("document.documentElement.dataset.resHarness", seconds: 15)
         check("WebKit injects the extension's content scripts", injected)
         let resRan = await waitFor("document.documentElement.classList.contains('res')", seconds: 30)
