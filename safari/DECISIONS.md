@@ -182,8 +182,10 @@ after that `load`, RES opened a tab. Safari 27.2 directly: a cross-origin
 frame fired `load` on each of two fragment navigations, a same-origin frame on
 none. The WebKit harness, with a click on the console's `#res:settings` link
 added: the console was gone 5 s later and RES had opened a tab; with the fix,
-open and no tab, in two runs. The diagnostics were not committed and are not
-in the installed build.
+open and no tab, in two runs. In the owner's Safari 27.2 with the fixed build
+(2026-11-24): the console stays open after following its search link. The
+diagnostics were not committed and are not in the installed build; the entries
+they left in the extension's storage were deleted.
 
 **Rejected.** Arming the timer only on the frame's first `load`: a console that
 really reloads and fails would then go unnoticed.
@@ -197,8 +199,8 @@ visits, including one from before both. So the record stays in IndexedDB.
 
 ## Open
 
-- **Not checked in Safari itself:** the media download button, and the settings
-  console with both fixes above (both pass in the WebKit harness).
+- **Not checked in Safari itself:** the media download button (it passes in the
+  WebKit harness).
 - **Not exercised anywhere yet:** backup sign-in flows (Dropbox, Google Drive,
   OneDrive: `windows.create` popups and `webRequest.onBeforeRedirect`), runtime
   permission prompts for other sites' embeds, private windows.
