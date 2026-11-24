@@ -1,5 +1,10 @@
 # Reddit Enhancement Suite
 
+> [!NOTE]
+> **This fork adds Safari support.** It builds RES as a Safari web extension for the Mac (Safari 18.4 or later), from the same source as the Chrome and Firefox builds, inside a small app that Safari installs it from. [safari/README.md](safari/README.md) covers building, installing and testing it, and what works differently in Safari.
+>
+> The Safari build is not an official RES release and the RES team does not support it, so please do not report its problems upstream. This fork publishes no binaries; build the app from source. The rest of this README is upstream's.
+
 [![RES Pipeline](https://github.com/honestbleeps/Reddit-Enhancement-Suite/actions/workflows/pipeline.yml/badge.svg)](https://github.com/honestbleeps/Reddit-Enhancement-Suite/actions/workflows/pipeline.yml)
 [![Chat on Discord](https://img.shields.io/discord/681993947085799490?label=Discord)](https://discord.gg/UzkFNNa)
 
