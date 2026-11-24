@@ -97,7 +97,8 @@ const restrictedTypeNames = {
 
 export default ([
 	{
-		ignores: ['dist/**', 'lib/vendor/*.js', '!lib/vendor/index.js'],
+		// The Safari harness's scripts run in WebKit's extension worlds, not in RES's build.
+		ignores: ['dist/**', 'lib/vendor/*.js', '!lib/vendor/index.js', 'safari/tests/harness/*.js'],
 	},
 	{
 		files: ['**/*.{js,cjs,mjs}'],

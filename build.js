@@ -35,6 +35,13 @@ const targets = {
 		manifest: './chrome/manifest.json',
 		noSourcemap: true,
 	},
+	safari: {
+		browserName: 'safari',
+		browserMinVersion: '18.4',
+		manifest: './safari/manifest.json',
+		// Safari lacks requestIdleCallback; these replace the globals in every bundle.
+		inject: ['./lib/environment/utils/idleCallback.js'],
+	},
 	firefox: {
 		browserName: 'firefox',
 		browserMinVersion: '140.0',
@@ -74,7 +81,7 @@ const homepageURL /*: string */ = packageInfo.homepage;
 // production builds uses version number to keep the build reproducible
 const buildToken = isProduction ? version : devBuildToken;
 
-async function buildForBrowser(targetName, { manifest, noSourceMap, browserName, browserMinVersion, browserMobileMinVersion }) {
+async function buildForBrowser(targetName, { manifest, noSourceMap, browserName, browserMinVersion, browserMobileMinVersion, inject = [] }) {
 	const context = {
 		entryPoints: {
 			'foreground.entry': './lib/foreground.entry.js',
@@ -88,6 +95,7 @@ async function buildForBrowser(targetName, { manifest, noSourceMap, browserName,
 		sourcemap: !isProduction || !noSourceMap,
 		outdir: `./dist/${targetName}/`,
 		bundle: true,
+		inject,
 		format: 'iife',
 		treeShaking: true,
 		metafile: true,

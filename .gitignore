@@ -80,3 +80,6 @@ $RECYCLE.BIN/
 
 ## NPM package lock ##
 package-lock.json
+
+# Safari harness fixture (fetched from the Wayback Machine)
+/safari/tests/fixtures/
